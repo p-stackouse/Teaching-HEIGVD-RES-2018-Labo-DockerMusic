@@ -10,7 +10,7 @@ var package_moment = require('moment');
 var package_uuid = require('uuid');
 
 //Import protocol file
-var file_protocole = require('./../../udp_protocol.js');
+var file_protocole = require('./udp_protocol.js');
 
 const MUSIC = {
     piano: "ti-ta-ti",
@@ -22,14 +22,10 @@ const MUSIC = {
 
 
 var arg_instrument = process.argv[2];
-var json = {
+var sound_sent = {
     uuid: package_uuid(),
     instrument: process.argv[2]
 };
-var socket = package_dgram.createSocket('udp4');
-var interval = 1000;
-
-var sound_sent = JSON.stringify(json);
 
 //Verify if instrument passed in argument is correct
 function verifyInstrument(){
@@ -52,12 +48,20 @@ function verifyInstrument(){
 
 //Send message with UDP Protocol
 function sendSound(){
+    sound_sent.activeSince = package_moment();
+
+    var msg = JSON.stringify(sound_sent);
+
     console.log("Multicast sending '" + MUSIC[arg_instrument] + "' to: " + file_protocole.ADDRESS_MULTI + ":" + file_protocole.PORT);
-    socket.send(sound_sent, 0, sound_sent.length, file_protocole.PORT, file_protocole.ADDRESS_MULTI, function (err, bytes) {
+    socket.send(msg, 0, msg.length, file_protocole.PORT, file_protocole.ADDRESS_MULTI, function (err, bytes) {
         if (err) throw err;
     });
     console.log("Info: message sent!");
 }
+
+var socket = package_dgram.createSocket('udp4');
+var interval = 1000;
+
 
 verifyInstrument();
 setInterval(sendSound, interval);

@@ -10,7 +10,7 @@ var package_net = require('net');
 var package_moment = require('moment');
 
 //Import protocol file
-var file_protocol = require('./../../udp_protocol.js');
+var file_protocol = require('./udp_protocol.js');
 
 
 var udp_socket = package_dgram.createSocket('udp4');
@@ -29,6 +29,7 @@ function printInstruments(){
 function addInstrument(content){
     for (var i = 0; i < instruments.length; ++i) {
         if(content.uuid == instruments[i].uuid){
+            instruments[i].activeSince = content.activeSince;
             return;
         }
     }
@@ -55,7 +56,7 @@ udp_socket.on('message', function(message, source){
 function verifyInstruments(){
     //For every instruments, verify if it sounds
     for(i = 0; i < instruments.length; ++i){
-        if(moment().diff(instruments[i].activeSince) > file_protocol.DELAY_MAX){
+        if(package_moment().diff(instruments[i].activeSince) > file_protocol.DELAY_MAX){
             console.log("Instrument removed :" + instruments[i]);
             instruments.splice(i, 1);
         }
